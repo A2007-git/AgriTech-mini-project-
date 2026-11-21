@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriTech - Smart Farmer Advisory, Weather & Mandi Intelligence</title>
+  <meta name="description" content="AgriTech empowers farmers with real-time agro-meteorological weather alerts, crop management advisories, AI plant disease diagnosis, live mandi prices, and direct marketplace.">
+  
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons for agricultural and UI icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- PWA & Mobile Web App Settings -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#15803d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/design-tokens.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="light-theme">
+
+  <!-- Top Emergency / Agro-Met Alert Banner -->
+  <aside id="alert-ticker" class="alert-ticker" aria-label="Urgent Agro Advisory">
+    <div class="ticker-content">
+      <span class="ticker-badge"><i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="urgentAlert">Agro Advisory</span></span>
+      <p id="ticker-text" class="ticker-message">Loading regional agro-meteorological advisories...</p>
+    </div>
+    <button id="close-ticker-btn" class="ticker-close" aria-label="Dismiss alert"><i class="fa-solid fa-xmark"></i></button>
+  </aside>
+
+  <!-- Header & Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="brand-logo">
+          <i class="fa-solid fa-seedling"></i>
+        </div>
+        <div class="brand-info">
+          <h1 class="brand-title">Agri<span>Tech</span></h1>
+          <p class="brand-subtitle" data-i18n="brandSubtitle">Smart Farming & Mandi Hub</p>
+        </div>
+      </div>
+
+      <!-- Quick Location & Region Selector -->
+      <div class="location-picker-wrap">
+        <label for="region-select" class="visually-hidden">Select Location</label>
+        <div class="location-input-box">
+          <i class="fa-solid fa-location-dot location-icon"></i>
+          <select id="region-select" class="region-select" aria-label="Choose your agricultural region">
+            <option value="nagpur">Nagpur, Maharashtra (Orange/Soybean/Cotton)</option>
+            <option value="ludhiana">Ludhiana, Punjab (Wheat/Paddy)</option>
+            <option value="karnal">Karnal, Haryana (Basmati/Wheat)</option>
+            <option value="nashik" selected>Nashik, Maharashtra (Onion/Grapes/Soybean)</option>
+            <option value="indore">Indore, Madhya Pradesh (Soybean/Wheat)</option>
+            <option value="rajkot">Rajkot, Gujarat (Cotton/Groundnut)</option>
+            <option value="varanasi">Varanasi, Uttar Pradesh (Vegetables/Paddy)</option>
+            <option value="guntur">Guntur, Andhra Pradesh (Chili/Cotton/Tobacco)</option>
+            <option value="mandya">Mandya, Karnataka (Sugarcane/Paddy)</option>
+            <option value="salem">Salem, Tamil Nadu (Tapioca/Turmeric)</option>
+            <option value="patna">Patna, Bihar (Maize/Paddy/Pulses)</option>
+            <option value="jaipur">Jaipur, Rajasthan (Mustard/Bajra)</option>
+            <option value="bhubaneswar">Bhubaneswar, Odisha (Paddy/Vegetables)</option>
+            <option value="custom">📍 Use GPS / Current Location</option>
+          </select>
+          <button id="btn-refresh-weather" class="btn-icon" title="Refresh Live Weather" aria-label="Refresh weather data">
+            <i class="fa-solid fa-arrows-rotate"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Global Controls: Voice Reader, Language Switcher, Helpline -->
+      <div class="header-actions">
+        <!-- Voice Assistant / Read Aloud -->
+        <button id="btn-voice-assist" class="btn-header-action" title="Read Aloud Advisory" aria-label="Listen to page advisory">
+          <i class="fa-solid fa-volume-high"></i>
+          <span class="action-label" data-i18n="listenBtn">Voice</span>
+        </button>
+
+        <!-- Language Switcher -->
+        <div class="lang-switch-wrap">
+          <button id="btn-lang-toggle" class="btn-lang-toggle" aria-label="Switch Language">
+            <i class="fa-solid fa-language"></i>
+            <span id="current-lang-label">English / हिंदी</span>
+          </button>
+        </div>
+
+        <!-- Govt Kisan Helpline Quick Button -->
+        <a href="tel:155261" class="btn-helpline" title="Govt Kisan Helpline: 155261">
+          <i class="fa-solid fa-phone"></i>
+          <span class="helpline-text">Govt Helpline: 155261</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="main-nav" aria-label="Main Navigation">
+      <ul class="nav-tabs" role="tablist">
+        <li role="presentation">
+          <button class="nav-tab-btn active" role="tab" aria-selected="true" data-tab="weather-tab" id="tab-weather">
+            <i class="fa-solid fa-cloud-sun-rain"></i>
+            <span data-i18n="navWeather">Weather & Agro-Met</span>
+          </button>
+        </li>
+        <li role="presentation">
+          <button class="nav-tab-btn" role="tab" aria-selected="false" data-tab="crop-tab" id="tab-crop">
+            <i class="fa-solid fa-wheat-awn"></i>
+            <span data-i18n="navCrop">Crop Advisory</span>
+          </button>
+        </li>
+        <li role="presentation">
+          <button class="nav-tab-btn" role="tab" aria-selected="false" data-tab="doctor-tab" id="tab-doctor">
+            <i class="fa-solid fa-stethoscope"></i>
+            <span data-i18n="navDoctor">Plant Doctor</span>
+          </button>
+        </li>
+        <li role="presentation">
+          <button class="nav-tab-btn" role="tab" aria-selected="false" data-tab="mandi-tab" id="tab-mandi">
+            <i class="fa-solid fa-chart-line"></i>
+            <span data-i18n="navMandi">Mandi Bhav & Trends</span>
+          </button>
+        </li>
+        <li role="presentation">
+          <button class="nav-tab-btn" role="tab" aria-selected="false" data-tab="marketplace-tab" id="tab-marketplace">
+            <i class="fa-solid fa-handshake"></i>
+            <span data-i18n="navMarketplace">Farmer Marketplace</span>
+          </button>
+        </li>
+        <li role="presentation">
+          <button class="nav-tab-btn" role="tab" aria-selected="false" data-tab="schemes-tab" id="tab-schemes">
+            <i class="fa-solid fa-landmark"></i>
+            <span data-i18n="navSchemes">Govt Schemes & Tools</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Content View Area -->
+  <main class="app-main-content">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: WEATHER & AGRO-MET ADVISORY        -->
+    <!-- ========================================== -->
+    <section id="weather-tab" class="tab-panel active" role="tabpanel" aria-labelledby="tab-weather">
+      <!-- Live Agro-Met Summary Card -->
+      <div class="weather-hero-card">
+        <div class="weather-current-grid">
+          <div class="weather-main-stat">
+            <div class="weather-icon-large" id="current-weather-icon">
+              <i class="fa-solid fa-sun weather-icon-sun"></i>
+            </div>
+            <div class="weather-temp-info">
+              <div class="temp-display">
+                <span id="current-temp" class="temp-val">28</span><span class="temp-unit">°C</span>
+              </div>
+              <p id="current-weather-desc" class="weather-condition-text">Partly Cloudy • Favorable for Fieldwork</p>
+              <p class="weather-location-tag"><i class="fa-solid fa-map-pin"></i> <span id="weather-location-name">Nashik, Maharashtra</span></p>
+            </div>
+          </div>
+
+          <!-- Micro-Climate & Soil Metrics -->
+          <div class="weather-metrics-grid">
+            <div class="metric-card">
+              <i class="fa-solid fa-droplet text-blue"></i>
+              <div class="metric-data">
+                <span class="metric-label" data-i18n="humidity">Humidity</span>
+                <span id="current-humidity" class="metric-val">65%</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <i class="fa-solid fa-wind text-cyan"></i>
+              <div class="metric-data">
+                <span class="metric-label" data-i18n="windSpeed">Wind Speed</span>
+                <span id="current-wind" class="metric-val">11 km/h</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <i class="fa-solid fa-cloud-showers-heavy text-indigo"></i>
+              <div class="metric-data">
+                <span class="metric-label" data-i18n="rainChance">Rain Risk (24h)</span>
+                <span id="current-rain-prob" class="metric-val">15%</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <i class="fa-solid fa-temperature-arrow-up text-amber"></i>
+              <div class="metric-data">
+                <span class="metric-label" data-i18n="soilTemp">Est. Soil Temp</span>
+                <span id="current-soil-temp" class="metric-val">24°C</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spraying Window Advisor (Unique & High-Value for Farmers) -->
+        <div class="spraying-advisor-box">
+          <div class="spraying-header">
+            <div class="spray-title">
+              <i class="fa-solid fa-spray-can-sparkles"></i>
+              <h3 data-i18n="sprayWindowTitle">Chemical & Organic Spraying Window Planner</h3>
+            </div>
+            <span id="spray-status-badge" class="badge badge-success">Optimal for Spraying</span>
+          </div>
+          <p id="spray-advice-text" class="spray-desc">
+            Current wind speed (&lt; 15 km/h) and low rain risk make next 6 hours ideal for pesticide/foliar fertilizer spraying.
+          </p>
+          <div class="spray-timeline-bar" id="spray-hourly-bar">
+            <!-- Dynamic 8-slot 24h timeline inserted via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Actionable Agro-Met Farming Advisories -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <div class="header-left">
+            <i class="fa-solid fa-clipboard-check text-green"></i>
+            <div>
+              <h2 data-i18n="agroAdvisoryTitle">Localized Agro-Meteorological Advisories</h2>
+              <p class="section-subtext" data-i18n="agroAdvisorySub">Tailored agronomic recommendations based on upcoming 72-hour forecast</p>
+            </div>
+          </div>
+          <button id="btn-read-weather-advisory" class="btn-secondary btn-sm" title="Listen to this advisory">
+            <i class="fa-solid fa-volume-high"></i> <span data-i18n="listenBtn">Listen</span>
+          </button>
+        </div>
+
+        <div class="advisory-cards-grid" id="weather-advisory-container">
+          <!-- Dynamic Advisory Cards -->
+        </div>
+      </div>
+
+      <!-- 7-Day Farm Weather Forecast Grid -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <div class="header-left">
+            <i class="fa-solid fa-calendar-week text-blue"></i>
+            <div>
+              <h2 data-i18n="forecast7DayTitle">7-Day Agriculture Weather Outlook</h2>
+              <p class="section-subtext" data-i18n="forecast7DaySub">Plan your sowing, irrigation, fertilizer top-dressing, and harvesting</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="forecast-week-grid" id="forecast-week-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: SMART CROP ADVISORY & PLANNER      -->
+    <!-- ========================================== -->
+    <section id="crop-tab" class="tab-panel" role="tabpanel" aria-labelledby="tab-crop">
+      <!-- Crop Category & Season Filter Bar -->
+      <div class="filter-toolbar">
+        <div class="filter-group">
+          <label for="crop-season-filter" data-i18n="seasonFilterLabel">Season:</label>
+          <select id="crop-season-filter" class="form-select">
+            <option value="all" data-i18n="allSeasons">All Seasons</option>
+            <option value="kharif" data-i18n="kharifSeason">Kharif (Monsoon / खरीफ)</option>
+            <option value="rabi" data-i18n="rabiSeason">Rabi (Winter / रबी)</option>
+            <option value="zaid" data-i18n="zaidSeason">Zaid (Summer / जायद)</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="crop-category-filter" data-i18n="categoryFilterLabel">Crop Type:</label>
+          <select id="crop-category-filter" class="form-select">
+            <option value="all" data-i18n="allCrops">All Categories</option>
+            <option value="cereal">Cereals (अनाज)</option>
+            <option value="pulse">Pulses (दालें)</option>
+            <option value="oilseed">Oilseeds (तिलहन)</option>
+            <option value="cash">Cash Crops (नकदी फसलें)</option>
+            <option value="vegetable">Vegetables (सब्जियां)</option>
+            <option value="fruit">Horticulture & Fruits (फल)</option>
+          </select>
+        </div>
+
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="crop-search-input" placeholder="Search crop e.g. Wheat, Tomato, Cotton..." aria-label="Search crops">
+        </div>
+
+        <button id="btn-open-soil-matcher" class="btn-primary">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span data-i18n="cropMatcherBtn">Soil-to-Crop Matcher</span>
+        </button>
+      </div>
+
+      <!-- Quick Interactive Calculators Banner -->
+      <div class="interactive-tools-banner">
+        <div class="tool-banner-item">
+          <div class="tool-icon"><i class="fa-solid fa-calculator"></i></div>
+          <div class="tool-info">
+            <h4 data-i18n="fertCalcTitle">Fertilizer Dose Calculator</h4>
+            <p data-i18n="fertCalcDesc">Calculate exact bags of Urea, DAP, MOP & Zinc for your land area.</p>
+          </div>
+          <button id="btn-quick-fert-calc" class="btn-secondary btn-sm" data-i18n="openCalculator">Calculate</button>
+        </div>
+
+        <div class="tool-banner-item">
+          <div class="tool-icon"><i class="fa-solid fa-leaf"></i></div>
+          <div class="tool-info">
+            <h4 data-i18n="organicRecipeTitle">Organic Farming Formulations</h4>
+            <p data-i18n="organicRecipeDesc">Prep steps for Jeevamrut, Neemastra & Beejamrit bio-fertilizers.</p>
+          </div>
+          <button id="btn-open-organic-modal" class="btn-secondary btn-sm" data-i18n="viewRecipes">View Recipes</button>
+        </div>
+      </div>
+
+      <!-- Crop Guide Cards Directory -->
+      <div class="crops-directory-grid" id="crops-directory-container">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: AI PLANT DOCTOR & PEST DIAGNOSIS   -->
+    <!-- ========================================== -->
+    <section id="doctor-tab" class="tab-panel" role="tabpanel" aria-labelledby="tab-doctor">
+      <div class="doctor-hero-banner">
+        <div class="doctor-hero-content">
+          <div class="doctor-badge"><i class="fa-solid fa-shield-virus"></i> <span data-i18n="doctorBadge">AI Crop Protection & Health Center</span></div>
+          <h2 data-i18n="doctorHeading">Instant Pest & Plant Disease Diagnostic</h2>
+          <p data-i18n="doctorSubheading">Identify leaf spots, fungal rusts, stem borers, and wilts. Get immediate chemical dosage & organic treatments.</p>
+        </div>
+      </div>
+
+      <div class="doctor-workspace-grid">
+        <!-- Left: Diagnostic Diagnostic Input Panel -->
+        <div class="diagnostic-input-card">
+          <h3 class="panel-title"><i class="fa-solid fa-sliders text-green"></i> <span data-i18n="diagInputTitle">Step 1: Select Crop & Symptoms</span></h3>
+          
+          <form id="plant-doctor-form" class="doctor-form">
+            <!-- Crop Selector -->
+            <div class="form-group">
+              <label for="diag-crop-select" class="form-label" data-i18n="diagSelectCrop">Select Crop:</label>
+              <select id="diag-crop-select" class="form-select" required>
+                <option value="wheat">Wheat (गेहूं)</option>
+                <option value="rice">Rice / Paddy (धान)</option>
+                <option value="cotton">Cotton (कपास)</option>
+                <option value="tomato" selected>Tomato (टमाटर)</option>
+                <option value="onion">Onion (प्याज़)</option>
+                <option value="potato">Potato (आलू)</option>
+                <option value="soybean">Soybean (सोयाबीन)</option>
+                <option value="mustard">Mustard (सरसों)</option>
+                <option value="chili">Chili (मिर्च)</option>
+                <option value="sugarcane">Sugarcane (गन्ना)</option>
+                <option value="maize">Maize (मक्का)</option>
+                <option value="banana">Banana (केला)</option>
+              </select>
+            </div>
+
+            <!-- Affected Plant Part -->
+            <div class="form-group">
+              <label class="form-label" data-i18n="diagAffectedPart">Affected Plant Part:</label>
+              <div class="part-chips-group">
+                <label class="chip-item">
+                  <input type="radio" name="plant-part" value="leaf" checked>
+                  <span><i class="fa-solid fa-leaf"></i> <span data-i18n="partLeaf">Leaves</span></span>
+                </label>
+                <label class="chip-item">
+                  <input type="radio" name="plant-part" value="stem">
+                  <span><i class="fa-solid fa-tree"></i> <span data-i18n="partStem">Stem / Stalk</span></span>
+                </label>
+                <label class="chip-item">
+                  <input type="radio" name="plant-part" value="fruit">
+                  <span><i class="fa-solid fa-apple-whole"></i> <span data-i18n="partFruit">Fruit / Pod / Grain</span></span>
+                </label>
+                <label class="chip-item">
+                  <input type="radio" name="plant-part" value="root">
+                  <span><i class="fa-solid fa-seedling"></i> <span data-i18n="partRoot">Root / Base</span></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Observed Visual Symptoms -->
+            <div class="form-group">
+              <label class="form-label" data-i18n="diagSymptoms">Observed Visual Symptoms:</label>
+              <div class="symptoms-checklist" id="symptoms-checklist-box">
+                <!-- Checkboxes populated dynamically based on crop & part -->
+              </div>
+            </div>
+
+            <!-- Upload / Image Test Section -->
+            <div class="form-group image-upload-group">
+              <label class="form-label" data-i18n="diagImageUpload">Or Upload / Test Photo Sample:</label>
+              <div class="upload-dropzone" id="upload-dropzone">
+                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                <p class="upload-prompt" data-i18n="dropzonePrompt">Drop crop photo here or click to browse</p>
+                <input type="file" id="leaf-image-file" accept="image/*" class="visually-hidden">
+                <div id="image-preview-box" class="image-preview-box hidden">
+                  <img id="leaf-preview-img" src="" alt="Crop Disease Preview">
+                  <button type="button" id="btn-remove-img" class="btn-remove-img"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              </div>
+
+              <!-- Quick Demo Photo Selector -->
+              <div class="sample-photos-row">
+                <span class="sample-photos-label" data-i18n="quickSamples">Try sample issues:</span>
+                <button type="button" class="sample-photo-btn" data-crop="tomato" data-symptom="early_blight">Tomato Early Blight</button>
+                <button type="button" class="sample-photo-btn" data-crop="wheat" data-symptom="yellow_rust">Wheat Yellow Rust</button>
+                <button type="button" class="sample-photo-btn" data-crop="cotton" data-symptom="pink_bollworm">Cotton Pink Bollworm</button>
+                <button type="button" class="sample-photo-btn" data-crop="onion" data-symptom="purple_blotch">Onion Purple Blotch</button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary btn-block btn-lg" id="btn-diagnose">
+              <i class="fa-solid fa-microscope"></i>
+              <span data-i18n="runDiagnosisBtn">Run AI Disease Diagnosis</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Right: Prescription & Treatment Result Panel -->
+        <div class="diagnostic-result-card" id="diagnostic-result-panel">
+          <div class="result-placeholder" id="result-placeholder">
+            <i class="fa-solid fa-wheat-awn-circle-exclamation placeholder-icon"></i>
+            <h4 data-i18n="diagPlaceholderHeading">Select Symptoms & Click Diagnose</h4>
+            <p data-i18n="diagPlaceholderText">AgriTech AI Doctor will formulate chemical dosages, organic alternatives, and preventive cultural practices.</p>
+          </div>
+
+          <div class="result-content hidden" id="result-active-content">
+            <!-- Injected by plant_doctor.js -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: MANDI BHAV, MSP & PRICE TRENDS      -->
+    <!-- ========================================== -->
+    <section id="mandi-tab" class="tab-panel" role="tabpanel" aria-labelledby="tab-mandi">
+      <!-- Mandi Search & Filter Header -->
+      <div class="mandi-filter-bar">
+        <div class="filter-group">
+          <label for="mandi-state-filter" data-i18n="mandiStateLabel">State:</label>
+          <select id="mandi-state-filter" class="form-select">
+            <option value="all">All India (समस्त भारत)</option>
+            <option value="Maharashtra" selected>Maharashtra</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Haryana">Haryana</option>
+            <option value="Madhya Pradesh">Madhya Pradesh</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Uttar Pradesh">Uttar Pradesh</option>
+            <option value="Rajasthan">Rajasthan</option>
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Bihar">Bihar</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="mandi-commodity-filter" data-i18n="mandiCropLabel">Commodity:</label>
+          <select id="mandi-commodity-filter" class="form-select">
+            <option value="all">All Commodities (सभी फसलें)</option>
+            <option value="Wheat">Wheat (गेहूं)</option>
+            <option value="Paddy (Basmati)">Paddy - Basmati (धान बासमती)</option>
+            <option value="Cotton">Cotton / Kapas (कपास)</option>
+            <option value="Soybean">Soybean (सोयाबीन)</option>
+            <option value="Mustard">Mustard / Sarson (सरसों)</option>
+            <option value="Onion" selected>Onion (प्याज़)</option>
+            <option value="Orange (Santra)">Orange / Santra (नागपुर संतरा)</option>
+            <option value="Tomato">Tomato (टमाटर)</option>
+            <option value="Potato">Potato (आलू)</option>
+            <option value="Chili (Red)">Red Chili (लाल मिर्च)</option>
+            <option value="Gram (Chana)">Gram / Chana (चना)</option>
+            <option value="Maize">Maize (मक्का)</option>
+          </select>
+        </div>
+
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="mandi-search-input" placeholder="Search Mandi or APMC (e.g. Lasalgaon, Khanna)..." aria-label="Search mandi">
+        </div>
+
+        <button id="btn-open-profit-calc" class="btn-secondary">
+          <i class="fa-solid fa-truck-ramp-box"></i>
+          <span data-i18n="mandiProfitCalcBtn">Transport & Net Profit Calculator</span>
+        </button>
+      </div>
+
+      <!-- Mandi Highlights Stats Row -->
+      <div class="mandi-stats-row">
+        <div class="mandi-stat-card">
+          <div class="stat-icon bg-green-light text-green"><i class="fa-solid fa-scale-balanced"></i></div>
+          <div class="stat-body">
+            <span class="stat-title" data-i18n="topGainer">Top Gainer Today</span>
+            <span class="stat-highlight text-green" id="top-gainer-text">Soybean (+₹180/Q)</span>
+          </div>
+        </div>
+
+        <div class="mandi-stat-card">
+          <div class="stat-icon bg-blue-light text-blue"><i class="fa-solid fa-boxes-stacked"></i></div>
+          <div class="stat-body">
+            <span class="stat-title" data-i18n="totalArrivals">Total Mandi Arrivals</span>
+            <span class="stat-highlight" id="total-arrivals-text">1,48,200 Quintals</span>
+          </div>
+        </div>
+
+        <div class="mandi-stat-card">
+          <div class="stat-icon bg-amber-light text-amber"><i class="fa-solid fa-chart-line-up"></i></div>
+          <div class="stat-body">
+            <span class="stat-title" data-i18n="mspComparison">Govt MSP Benchmark</span>
+            <span class="stat-highlight" id="msp-status-text">Wheat: ₹2,275/Q (Mandi avg: ₹2,450)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive 30-Day Mandi Price Trend Graph Card -->
+      <div class="section-card price-trend-card">
+        <div class="section-card-header">
+          <div class="header-left">
+            <i class="fa-solid fa-chart-area text-green"></i>
+            <div>
+              <h2 data-i18n="trendChartTitle">Mandi Price Trend & AI Sell/Hold Recommendation</h2>
+              <p class="section-subtext" id="chart-commodity-subtitle">Showing 15-Day Historical Price Curve & Forecast for <strong id="chart-crop-name">Onion</strong> in <strong id="chart-mandi-name">Lasalgaon Mandi</strong></p>
+            </div>
+          </div>
+          <div class="trend-action-badge" id="trend-ai-badge">
+            <span class="badge badge-success"><i class="fa-solid fa-arrow-trend-up"></i> Recommendation: Strong Demand • Good Time to Sell</span>
+          </div>
+        </div>
+
+        <!-- Canvas Chart Container -->
+        <div class="chart-container-box">
+          <canvas id="mandiPriceChart" height="240"></canvas>
+        </div>
+      </div>
+
+      <!-- Mandi Live Rates Table & Grid -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <div class="header-left">
+            <i class="fa-solid fa-table-list text-blue"></i>
+            <div>
+              <h2 data-i18n="liveMandiTableTitle">APMC Mandi Rates Directory (₹ per Quintal)</h2>
+              <p class="section-subtext" data-i18n="liveMandiTableSub">Official daily modal, minimum, and maximum prices with MSP comparison</p>
+            </div>
+          </div>
+          <span class="live-pulse-badge"><span class="pulse-dot"></span> <span data-i18n="liveUpdated">Live Updated</span></span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="mandi-table" id="mandi-data-table">
+            <thead>
+              <tr>
+                <th data-i18n="thCommodity">Commodity / Crop</th>
+                <th data-i18n="thMandi">APMC Mandi</th>
+                <th data-i18n="thState">State</th>
+                <th data-i18n="thMinPrice">Min (₹/Q)</th>
+                <th data-i18n="thMaxPrice">Max (₹/Q)</th>
+                <th data-i18n="thModalPrice">Modal Price (₹/Q)</th>
+                <th data-i18n="thMspDiff">vs MSP</th>
+                <th data-i18n="thTrend">Trend</th>
+                <th data-i18n="thAction">Action</th>
+              </tr>
+            </thead>
+            <tbody id="mandi-table-body">
+              <!-- Rendered by mandi.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: FARMER DIRECT MARKETPLACE (B2B/B2C) -->
+    <!-- ========================================== -->
+    <section id="marketplace-tab" class="tab-panel" role="tabpanel" aria-labelledby="tab-marketplace">
+      <div class="marketplace-hero">
+        <div class="marketplace-hero-text">
+          <div class="hero-tag"><i class="fa-solid fa-handshake"></i> <span data-i18n="mktTag">Zero Middlemen • Direct Farm Trade</span></div>
+          <h2 data-i18n="mktHeading">Farmer Direct Produce & Buyer Connect</h2>
+          <p data-i18n="mktSub">List your harvest for sale or connect with verified food processors, exporters, and wholesale buyers across India.</p>
+        </div>
+        <button id="btn-open-sell-modal" class="btn-primary btn-lg">
+          <i class="fa-solid fa-plus"></i>
+          <span data-i18n="postProduceBtn">List Your Produce for Sale</span>
+        </button>
+      </div>
+
+      <!-- Marketplace Filter Tabs: Sell Listings vs Buyer Inquiries -->
+      <div class="mkt-nav-pills">
+        <button class="mkt-pill active" id="pill-farmer-listings">
+          <i class="fa-solid fa-basket-shopping"></i> <span data-i18n="availableHarvest">Available Farmer Harvests (<span id="count-farmer-listings">12</span>)</span>
+        </button>
+        <button class="mkt-pill" id="pill-buyer-demands">
+          <i class="fa-solid fa-building-wheat"></i> <span data-i18n="buyerDemands">Verified Buyer Demands (<span id="count-buyer-demands">8</span>)</span>
+        </button>
+      </div>
+
+      <!-- Listings Grid -->
+      <div class="marketplace-grid" id="marketplace-listings-grid">
+        <!-- Rendered by marketplace.js -->
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 6: GOVT SCHEMES & FARMER CALCULATORS  -->
+    <!-- ========================================== -->
+    <section id="schemes-tab" class="tab-panel" role="tabpanel" aria-labelledby="tab-schemes">
+      <div class="schemes-layout-grid">
+        <!-- Left: Government Scheme Navigator -->
+        <div class="schemes-left-col">
+          <div class="section-card">
+            <div class="section-card-header">
+              <div class="header-left">
+                <i class="fa-solid fa-landmark-flag text-green"></i>
+                <div>
+                  <h2 data-i18n="schemesHeading">Major Government Agricultural Schemes & Subsidies</h2>
+                  <p class="section-subtext" data-i18n="schemesSub">Check eligibility, subsidy percentages, documents needed, and application links.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category Filter for Schemes -->
+            <div class="schemes-category-bar">
+              <button class="scheme-cat-btn active" data-cat="all">All Schemes</button>
+              <button class="scheme-cat-btn" data-cat="subsidy">Equipment & Solar Subsidies</button>
+              <button class="scheme-cat-btn" data-cat="insurance">Crop Insurance & Finance</button>
+              <button class="scheme-cat-btn" data-cat="income">Direct Income & Soil</button>
+            </div>
+
+            <div class="schemes-cards-list" id="schemes-cards-container">
+              <!-- Rendered by schemes.js -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Farmer Practical Calculator Suite -->
+        <div class="schemes-right-col">
+          <!-- Fertilizer Dose Calculator Card -->
+          <div class="section-card calculator-card">
+            <div class="section-card-header">
+              <div class="header-left">
+                <i class="fa-solid fa-calculator text-amber"></i>
+                <div>
+                  <h3 data-i18n="fertCalcCardHeading">Farm Fertilizer Bag Calculator</h3>
+                  <p class="section-subtext" data-i18n="fertCalcCardSub">Calculate exact Urea, DAP, and MOP bags for your field</p>
+                </div>
+              </div>
+            </div>
+
+            <form id="standalone-fert-form" class="calc-form">
+              <div class="form-group">
+                <label for="calc-crop-select" class="form-label" data-i18n="calcCrop">Crop:</label>
+                <select id="calc-crop-select" class="form-select">
+                  <option value="wheat">Wheat (गेहूं) - 120:60:40 NPK</option>
+                  <option value="rice">Paddy/Rice (धान) - 100:50:50 NPK</option>
+                  <option value="cotton">Cotton (कपास) - 150:60:60 NPK</option>
+                  <option value="sugarcane">Sugarcane (गन्ना) - 250:115:115 NPK</option>
+                  <option value="maize">Maize (मक्का) - 120:60:40 NPK</option>
+                  <option value="mustard">Mustard (सरसों) - 80:40:40 NPK</option>
+                  <option value="potato">Potato (आलू) - 150:100:120 NPK</option>
+                  <option value="onion">Onion (प्याज़) - 100:50:50 NPK</option>
+                </select>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="calc-area-input" class="form-label" data-i18n="calcArea">Land Area:</label>
+                  <input type="number" id="calc-area-input" class="form-input" min="0.25" max="1000" step="0.25" value="2">
+                </div>
+                <div class="form-group">
+                  <label for="calc-unit-select" class="form-label" data-i18n="calcUnit">Unit:</label>
+                  <select id="calc-unit-select" class="form-select">
+                    <option value="acre" selected>Acres (एकड़)</option>
+                    <option value="hectare">Hectares (हेक्टेयर)</option>
+                    <option value="bigha">Bigha (बीघा - 0.4 Acre)</option>
+                  </select>
+                </div>
+              </div>
+
+              <button type="button" id="btn-calculate-fert-dose" class="btn-primary btn-block">
+                <i class="fa-solid fa-calculator"></i> <span data-i18n="btnComputeDose">Calculate Fertilizer Bags</span>
+              </button>
+
+              <div id="fert-calc-results" class="fert-calc-results-box">
+                <!-- Result badges injected via JS -->
+              </div>
+            </form>
+          </div>
+
+          <!-- Solar Pump Subsidy Estimator Card -->
+          <div class="section-card calculator-card">
+            <div class="section-card-header">
+              <div class="header-left">
+                <i class="fa-solid fa-solar-panel text-green"></i>
+                <div>
+                  <h3 data-i18n="solarCalcHeading">PM-KUSUM Solar Pump Subsidy Estimator</h3>
+                  <p class="section-subtext" data-i18n="solarCalcSub">Estimate government grant vs farmer contribution</p>
+                </div>
+              </div>
+            </div>
+
+            <form id="solar-calc-form" class="calc-form">
+              <div class="form-group">
+                <label for="pump-hp-select" class="form-label">Pump Capacity:</label>
+                <select id="pump-hp-select" class="form-select">
+                  <option value="3">3 HP Solar Pump (Small / 1-3 Acres)</option>
+                  <option value="5" selected>5 HP Solar Pump (Medium / 3-7 Acres)</option>
+                  <option value="7.5">7.5 HP Solar Pump (Large / 7-15 Acres)</option>
+                  <option value="10">10 HP Solar Pump (Commercial / 15+ Acres)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="farmer-category-select" class="form-label">Farmer Category / Region:</label>
+                <select id="farmer-category-select" class="form-select">
+                  <option value="general">General Plains (60% Govt Subsidy: 30% Centre + 30% State)</option>
+                  <option value="sc_st">SC/ST / Small Farmer (Up to 75% Subsidy)</option>
+                  <option value="northeast">North-East / Hilly / Island (Up to 80% Subsidy)</option>
+                </select>
+              </div>
+
+              <button type="button" id="btn-estimate-solar" class="btn-secondary btn-block">
+                <i class="fa-solid fa-bolt"></i> Calculate Subsidy & Cost
+              </button>
+
+              <div id="solar-calc-results" class="solar-calc-results-box">
+                <!-- Injected via JS -->
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODALS                                     -->
+  <!-- ========================================== -->
+
+  <!-- Modal 1: Post Produce for Sale -->
+  <div id="modal-post-produce" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-produce-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-produce-title"><i class="fa-solid fa-plus-circle text-green"></i> <span data-i18n="modalSellTitle">Post Your Harvest for Sale</span></h3>
+        <button class="modal-close-btn" data-close-modal="modal-post-produce" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="form-sell-produce" class="modal-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sell-crop-name" class="form-label" data-i18n="cropNameLabel">Crop Name & Variety:</label>
+            <input type="text" id="sell-crop-name" class="form-input" placeholder="e.g. Sharbati Wheat, Red Onion, Desi Tomato" required>
+          </div>
+          <div class="form-group">
+            <label for="sell-crop-category" class="form-label" data-i18n="cropCatLabel">Category:</label>
+            <select id="sell-crop-category" class="form-select">
+              <option value="Cereals">Cereals (अनाज)</option>
+              <option value="Vegetables">Vegetables (सब्जी)</option>
+              <option value="Pulses">Pulses (दालें)</option>
+              <option value="Oilseeds">Oilseeds (तिलहन)</option>
+              <option value="Fruits">Fruits & Spices (फल व मसाले)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sell-quantity" class="form-label" data-i18n="quantityLabel">Available Quantity:</label>
+            <div class="input-with-unit">
+              <input type="number" id="sell-quantity" class="form-input" min="1" step="0.5" placeholder="e.g. 50" required>
+              <select id="sell-quantity-unit" class="form-select unit-select">
+                <option value="Quintal">Quintals (क्विंटल)</option>
+                <option value="Tons">Metric Tons (टन)</option>
+                <option value="Bags">Bags / बोरियां</option>
+                <option value="Boxes">Crater / Boxes</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="sell-price-ask" class="form-label" data-i18n="expectedPriceLabel">Expected Price (₹ / Quintal):</label>
+            <input type="number" id="sell-price-ask" class="form-input" min="100" placeholder="e.g. 2600" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sell-farmer-name" class="form-label" data-i18n="farmerNameLabel">Farmer Name:</label>
+            <input type="text" id="sell-farmer-name" class="form-input" placeholder="e.g. Ramesh Patil" required>
+          </div>
+          <div class="form-group">
+            <label for="sell-farmer-phone" class="form-label" data-i18n="phoneLabel">Phone / WhatsApp Number:</label>
+            <input type="tel" id="sell-farmer-phone" class="form-input" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sell-farmer-village" class="form-label" data-i18n="villageLabel">Village / District:</label>
+            <input type="text" id="sell-farmer-village" class="form-input" placeholder="e.g. Niphad, Nashik" required>
+          </div>
+          <div class="form-group">
+            <label for="sell-harvest-date" class="form-label" data-i18n="harvestDateLabel">Harvest Ready By:</label>
+            <input type="date" id="sell-harvest-date" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="sell-is-organic">
+            <span data-i18n="isOrganicLabel">Certified Organic / Residue Free Produce (प्राकृतिक / जैविक उपज)</span>
+          </label>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close-modal="modal-post-produce" data-i18n="cancelBtn">Cancel</button>
+          <button type="submit" class="btn-primary" data-i18n="publishListingBtn">Publish Listing</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Soil-to-Crop Matcher -->
+  <div id="modal-soil-matcher" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-wand-magic-sparkles text-green"></i> <span data-i18n="soilMatcherModalTitle">Soil & Climate to Crop Matcher</span></h3>
+        <button class="modal-close-btn" data-close-modal="modal-soil-matcher" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-soil-matcher" class="modal-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="match-soil-type" class="form-label">Soil Type:</label>
+              <select id="match-soil-type" class="form-select">
+                <option value="black">Black Clay Soil (काली मिट्टी - Cotton/Soybean/Wheat)</option>
+                <option value="alluvial">Alluvial Loam (दोमट मिट्टी - Wheat/Paddy/Sugarcane/Vegetables)</option>
+                <option value="red">Red & Laterite Soil (लाल मिट्टी - Groundnut/Pulses/Maize)</option>
+                <option value="sandy">Sandy Loam (बलुई दोमट - Mustard/Bajra/Vegetables/Melons)</option>
+                <option value="clay">Heavy Clay (चिकनी मिट्टी - Paddy/Mustard)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="match-water-source" class="form-label">Irrigation Water Availability:</label>
+              <select id="match-water-source" class="form-select">
+                <option value="assured">Assured Irrigation (Borewell / Canal / Drip)</option>
+                <option value="moderate">Moderate (Well / Periodic Canal)</option>
+                <option value="rainfed">Rainfed / Dryland (Only Monsoon Dependent)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="match-season" class="form-label">Upcoming Sowing Season:</label>
+              <select id="match-season" class="form-select">
+                <option value="kharif">Kharif (June - October)</option>
+                <option value="rabi">Rabi (October - March)</option>
+                <option value="zaid">Zaid (March - June)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="match-investment" class="form-label">Investment / Risk Appetite:</label>
+              <select id="match-investment" class="form-select">
+                <option value="low">Low Investment & Low Risk (Cereals/Millets)</option>
+                <option value="medium" selected>Moderate Investment (Pulses/Oilseeds)</option>
+                <option value="high">High Return Commercial / Horticulture (Vegetables/Fruits)</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary btn-block">
+            <i class="fa-solid fa-sparkles"></i> Find Recommended Profitable Crops
+          </button>
+        </form>
+
+        <div id="soil-match-results" class="soil-match-results-box hidden">
+          <!-- Injected by crops.js -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Transport & Mandi Net Profit Calculator -->
+  <div id="modal-profit-calc" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-card modal-card-lg">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-truck-ramp-box text-blue"></i> <span data-i18n="profitModalTitle">Mandi Transport & Net In-Hand Profit Calculator</span></h3>
+        <button class="modal-close-btn" data-close-modal="modal-profit-calc" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-subtitle">Compare selling at local APMC vs distant major city APMC factoring in freight truck cost, packaging, loading, and mandi cess.</p>
+        
+        <div class="profit-calc-grid">
+          <form id="form-mandi-profit-calc" class="modal-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="calc-crop-vol" class="form-label">Crop Volume (Quintals):</label>
+                <input type="number" id="calc-crop-vol" class="form-input" min="1" value="40" required>
+              </div>
+              <div class="form-group">
+                <label for="calc-local-price" class="form-label">Local Mandi Price (₹/Q):</label>
+                <input type="number" id="calc-local-price" class="form-input" min="100" value="2100" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="calc-dist-mandi-price" class="form-label">Major/Distant Mandi Price (₹/Q):</label>
+                <input type="number" id="calc-dist-mandi-price" class="form-input" min="100" value="2550" required>
+              </div>
+              <div class="form-group">
+                <label for="calc-dist-km" class="form-label">Distance to Distant Mandi (KM):</label>
+                <input type="number" id="calc-dist-km" class="form-input" min="5" value="120" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="calc-truck-freight" class="form-label">Truck Rate (₹ / km):</label>
+                <input type="number" id="calc-truck-freight" class="form-input" min="5" value="25">
+              </div>
+              <div class="form-group">
+                <label for="calc-loading-cost" class="form-label">Loading & Hamali (₹ / Q):</label>
+                <input type="number" id="calc-loading-cost" class="form-input" min="0" value="35">
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary btn-block">
+              <i class="fa-solid fa-chart-pie"></i> Compare Net Profits
+            </button>
+          </form>
+
+          <div id="mandi-profit-comparison-box" class="profit-comparison-box">
+            <!-- Results injected by mandi.js -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Organic Farming Recipes -->
+  <div id="modal-organic-recipes" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-card modal-card-lg">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-leaf text-green"></i> <span data-i18n="organicModalTitle">Natural & Bio-Fertilizer Preparation Recipes</span></h3>
+        <button class="modal-close-btn" data-close-modal="modal-organic-recipes" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="organic-recipes-body">
+        <!-- Injected by crops.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Crop Detail & Growth Stage Modal -->
+  <div id="modal-crop-detail" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-card modal-card-lg">
+      <div class="modal-header">
+        <h3 id="modal-crop-title"><i class="fa-solid fa-wheat-awn text-green"></i> <span>Crop Cultivation Guide</span></h3>
+        <button class="modal-close-btn" data-close-modal="modal-crop-detail" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="modal-crop-content">
+        <!-- Injected dynamically by crops.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-col">
+        <div class="footer-brand">
+          <i class="fa-solid fa-seedling"></i>
+          <span>AgriTech</span>
+        </div>
+        <p class="footer-tagline" data-i18n="footerTagline">Empowering farmers with agro-intelligence, precision weather advisories, disease diagnosis, and fair market discovery.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4 data-i18n="quickLinksTitle">Quick Resources</h4>
+        <ul class="footer-links">
+          <li><a href="#" data-tab-jump="weather-tab"><i class="fa-solid fa-cloud-sun"></i> Agro-Met Advisories</a></li>
+          <li><a href="#" data-tab-jump="crop-tab"><i class="fa-solid fa-wheat-awn"></i> 20+ Crop Calendar</a></li>
+          <li><a href="#" data-tab-jump="doctor-tab"><i class="fa-solid fa-stethoscope"></i> Plant Doctor Diagnostic</a></li>
+          <li><a href="#" data-tab-jump="mandi-tab"><i class="fa-solid fa-chart-line"></i> Mandi Bhav & APMC Rates</a></li>
+          <li><a href="#" data-tab-jump="schemes-tab"><i class="fa-solid fa-landmark"></i> PM-KISAN & KUSUM Schemes</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 data-i18n="emergencyHelplinesTitle">Government Agricultural Helplines</h4>
+        <div class="helpline-list">
+          <p><strong>National Farmer Helpline (PM-KISAN):</strong> <a href="tel:155261">155261</a> / <a href="tel:01124300606">011-24300606</a></p>
+          <p><strong>Govt Kisan Call Centre:</strong> <a href="tel:18001801551">1800-180-1551</a> (Toll-Free, 6 AM - 10 PM)</p>
+          <p><strong>PMFBY Crop Insurance Helpline:</strong> <a href="tel:18002005142">1800-200-5142</a></p>
+          <p><strong>Kisan Credit Card (KCC) Support:</strong> <a href="tel:1800115526">1800-11-5526</a></p>
